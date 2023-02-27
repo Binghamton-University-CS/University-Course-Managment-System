@@ -141,7 +141,7 @@ int main() {
 	      Course course;
 	      course.department = department;
 	      course.number = stoi(course_number);
-	      course.name = name
+	      course.name = name;
 	      courses[crn] = course;
 
 	      cout << "Success: built course " << department << course_number << " (CRN: " << crn << ")" << endl;
@@ -169,7 +169,7 @@ int main() {
     }
 	}
 
-	else if(command = "enroll"){
+	else if(command == "enroll"){
 
 	  cin >> bnumber >> userid >> first_name >> last_name;
 
@@ -195,7 +195,7 @@ int main() {
 
 	}
 
-	else if(command = "add"){
+	else if(command == "add"){
 
 	  cin >> bnumber >> crn;
 
@@ -251,11 +251,11 @@ int main() {
 
     else {
        
-        vector<string>& schedule = students[bnumber].schedule;
-        schedule.erase(remove(schedule.begin(), schedule.end(), crn), schedule.end());
+      //vector<string>& schedule = students[bnumber].schedule;
+      //schedule.erase(remove(schedule.begin(), schedule.end(), crn), schedule.end());
         
        
-        vector<string>& roster = 
+      //vector<string>& roster = 
 	  }
 
 	}
