@@ -104,6 +104,11 @@ void showPrompt() {
 int main() {
     string command, crn, department, course_number, name, bnumber, userid, first_name, last_name;
     
+    Student* students = new Student[];
+    Course* courses = new Course[];
+    int numStudents = 0;
+    int numCourses = 0;
+    
     showPrompt();
     while (true) {
                 
@@ -138,12 +143,12 @@ int main() {
 	    
 	    else{
 
-	      Course course;
-	      course.department = department;
-	      course.number = stoi(course_number);
-	      course.name = name;
-	      courses[crn] = course;
-
+	       courses[numCourses].crn = crn;
+               courses[numCourses].department = department;
+               courses[numCourses].number = number;
+               courses[numCourses].name = name;
+               numCourses++;
+                cout << "Course added successfully" << endl;
 	      cout << "Success: built course " << department << course_number << " (CRN: " << crn << ")" << endl;
     
 	    }
