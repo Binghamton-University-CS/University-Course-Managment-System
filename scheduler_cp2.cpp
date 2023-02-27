@@ -10,20 +10,20 @@ struct Course {
     string department;
     int number;
     string name;
-    vector<string> roster;
+  //vector<string> roster;
 };
 
 struct Student {
     string userid;
     string first_name;
     string last_name;
-    vector<string> schedule;
+  //vector<string> schedule;
 };
 
 
-map<string, Course> courses;
 
-map<string, Student> students;
+
+
 
 
 bool is_valid_crn(string crn) {
@@ -266,7 +266,18 @@ int main() {
 	}
 
 	else if(command == "schedule"){
-
+	   cin >> bnumber;
+    if (!is_valid_bnumber(bnumber)) {
+        cout << "Input Error: illegal B number" << endl;
+    } else if (!bnumber_exists(bnumber)) {
+        cout << "Fail: student " << bnumber << " does not exist" << endl;
+    } else {
+        cout << "Schedule for " << bnumber << ":" << endl;
+        for (string crn : students[bnumber].schedule) {
+            Course course = courses[crn];
+            cout << course.department << " " << course.number << " " << course.name << endl;
+        }
+    }
 
 
 	}
@@ -283,3 +294,8 @@ int main() {
 	}
 
     }
+
+    delete[] students;
+    delete[] courses;
+    return 0;
+}
