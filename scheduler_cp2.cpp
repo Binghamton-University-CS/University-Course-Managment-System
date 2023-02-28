@@ -1,328 +1,260 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <map>
 
 using namespace std;
 
-
 struct Course {
-    int crn;
-    string department;
-    int number;
-    string name;
-    vector<string> bNumbers;
+  int crn;
+  string department;
+  int number;
+  string name;
+
 };
 
 struct Student {
-    string bNumber;
-    string userid;
-    string first_name;
-    string last_name;
-    vector<int> crns; 
+  string bNumber;
+  string userID;
+  string firstName;
+  string lastName;
 };
 
-
-
-
-
-
-
-bool is_valid_crn(string crn) {
-    if (crn.size() != 6) {
-        return false;
+bool isValidBNumber(string str) {
+  if (str.length() != 9 || str[0] != 'B') {
+    return false;
+  }
+  for (int i = 1; i < 9; i++) {
+    if (!isdigit(str[i])) {
+      return false;
     }
-    for (char c : crn) {
-        if (!isdigit(c)) {
-            return false;
-        }
+  }
+  return true;
+}
+
+bool isValidUserID(string str) {
+  if (str.empty() || !isalpha(str[0])) {
+    return false;
+  }
+  for (char c : str) {
+    if (!isalnum(c)) {
+      return false;
     }
-    return true;
+  }
+  return true;
+}
+
+void enroll(Student *&students, int &numStudents, string bNumber, string userID,
+            string firstName, string lastName) {
+
+  if (bNumber.empty() || userID.empty() || firstName.empty() ||
+      lastName.empty()) {
+    cout << "Input Error: too few arguments" << endl;
+    return;
+  }
+  // Check if the B Number already exists
+  for (int i = 0; i < numStudents; i++) {
+    if (students[i].bNumber == bNumber) {
+      cout << "Fail: cannot enroll student, B Number exists" << endl;
+      return;
+    }
+  }
+
+  // Check if the input arguments are valid
+  if (!isValidBNumber(bNumber) || !isValidUserID(userID) || firstName.empty() ||
+      lastName.empty()) {
+    cout << "Input Error: invalid arguments" << endl;
+    return;
+  }
+
+  // Create a new student and add it to the dynamic array
+  Student newStudent = {bNumber, userID, firstName, lastName};
+  Student *newStudents = new Student[numStudents + 1];
+  for (int i = 0; i < numStudents; i++) {
+    newStudents[i] = students[i];
+  }
+  newStudents[numStudents] = newStudent;
+  numStudents++;
+  delete[] students;
+  students = newStudents;
+  cout << "Success: enrolled student " << newStudent.bNumber << " ("
+       << newStudent.userID << ") " << newStudent.lastName << ", "
+       << newStudent.firstName << endl;
+}
+
+bool isValidCRN(int crn) {
+  return (crn >= 100000 && crn <= 999999);
+}
+
+int findStudentIndex(Student *students, int numStudents, string bNumber) {
+  for (int i = 0; i < numStudents; i++) {
+    if (students[i].bNumber == bNumber) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+int findCourseIndex(Course *courses, int numCourses, int crn) {
+  for (int i = 0; i < numCourses; i++) {
+    if (courses[i].crn == crn) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 
-bool is_valid_department(string department) {
-    if (department.size() < 2 || department.size() > 4) {
-        return false;
-    }
-    for (char c : department) {
-        if (!isupper(c)) {
-            return false;
-        }
-    }
-    return true;
-}
 
 
-bool is_valid_course_number(string course_number) {
-    if (course_number.size() != 3) {
-        return false;
-    }
-    for (char c : course_number) {
-        if (!isdigit(c)) {
-            return false;
-        }
-    }
-    int number = stoi(course_number);
-    return (number >= 100 && number <= 700);
-}
 
 
-bool is_valid_bnumber(string bnumber) {
-    if (bnumber.size() != 9 || bnumber[0] != 'B') {
-        return false;
-    }
-    for (char c : bnumber.substr(1)) {
-        if (!isdigit(c)) {
-            return false;
-        }
-    }
-    return true;
-}
 
-bool isValidUserid(string userid) {
-    if (userid.size() == 0 || !isalpha(userId[0])) {
-        return false;
-    }
-    for (int i = 1; i < userid.size(); i++) {
-        if (!isalnum(userid[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-bool crn_exists(string crn) {
-    return (courses.find(crn) != courses.end());
-}
-
-
-bool bnumber_exists(string bnumber) {
-    return (students.find(bnumber) != students.end());
-}
 
 void showPrompt() {
-   cout << "Enter [\"build <crn> <department> <number> <name>\"" << endl <<
-                "       \"cancel <crn>\"" << endl <<
-                "       \"enroll <bnumber> <userid> <first> <last>\"" << endl <<
-                "       \"add <bnumber> <crn>\"" << endl <<
-                "       \"drop <bnumber> <crn>\"" << endl <<
-                "       \"roster <crn>\"" << endl <<
-                "       \"schedule <bnumber>\"" << endl <<
-                "       \"quit\"]" << endl <<
-                ": ";
+  cout << "Enter [\"build <crn> <department> <number> <name>\"" << endl
+       << "       \"cancel <crn>\"" << endl
+       << "       \"enroll <bnumber> <userid> <first> <last>\"" << endl
+       << "       \"add <bnumber> <crn>\"" << endl
+       << "       \"drop <bnumber> <crn>\"" << endl
+       << "       \"roster <crn>\"" << endl
+       << "       \"schedule <bnumber>\"" << endl
+       << "       \"quit\"]" << endl
+       << ": ";
 }
 
-
 int main() {
-    string command, crn, department, course_number, name, bnumber, userid, first_name, last_name;
+  Course *courses = nullptr;
+  Student *students = nullptr;
+  int numStudents = 0;
+  int num_courses = 0;
+  int max_courses = 0;
+
+  showPrompt();
+
+  while (true) {
+    string command;
+    cin >> command;
+
+    if (command == "build") {
+      int crn;
+      string department;
+      int number;
+      string name;
+
+      cin >> crn >> department >> number;
+      getline(cin, name);
+
+      // Make sure CRN is 6 digits
+      if (crn < 100000 || crn > 999999) {
+        cout << "Invalid CRN" << endl;
+        continue;
+      }
+
+      // Make sure department is 2-4 characters
+      if (department.length() < 2 || department.length() > 4) {
+        cout << "Invalid department code" << endl;
+        continue;
+      }
+
+      // Make sure number is between 100 and 700
+      if (number < 100 || number > 700) {
+        cout << "Invalid course number" << endl;
+        continue;
+      }
+
+      // Add course to array
+      if (num_courses == max_courses) {
+        max_courses = max(max_courses * 2, 1);
+        Course *new_courses = new Course[max_courses];
+        for (int i = 0; i < num_courses; i++) {
+          new_courses[i] = courses[i];
+        }
+        delete[] courses;
+        courses = new_courses;
+      }
+
+      courses[num_courses].crn = crn;
+      courses[num_courses].department = department;
+      courses[num_courses].number = number;
+      courses[num_courses].name = name;
+      num_courses++;
+      cout << "Success: built course " << department << number
+           << " (CRN: " << crn << ")" << endl;
+    }
+
+    else if (command == "cancel") {
+      int crn;
+      cin >> crn;
+
+      // Make sure CRN is 6 digits
+      if (crn < 100000 || crn > 999999) {
+        cout << "Input Error: illegal CRN" << endl;
+        continue;
+      }
+
+      // Search for course with given CRN
+      bool found = false;
+      for (int i = 0; i < num_courses; i++) {
+        if (courses[i].crn == crn) {
+          // Shift courses after the removed course down in the array
+          for (int j = i; j < num_courses - 1; j++) {
+            courses[j] = courses[j + 1];
+          }
+          num_courses--;
+          found = true;
+          break;
+        }
+      }
+
+      if (found) {
+        cout << "Success: cancelled course " << crn << endl;
+      } else {
+        cout << "Fail: cannot cancel course, CRN does not exist" << endl;
+      }
+
+    } else if (command == "enroll") {
+      string bNumber, userID, firstName, lastName;
+      cin >> bNumber >> userID >> firstName >> lastName;
+      enroll(students, numStudents, bNumber, userID, firstName, lastName);
+
+    }
+
+    else if (command == "add") {
+
+
+      }
+
     
-    Student* students = new Student[];
-    Course* courses = new Course[];
-    int numStudents = 0;
-    int numCourses = 0;
-    
-    showPrompt();
-    while (true) {
-                
-        cin >> command;
-        
-        
-        if (command == "build") {
-            
-            cin >> crn >> department >> course_number;
-            getline(cin, name);
-            name = name.substr(1);  
-            
+    else if(command == "drop"){
 
-            if (!is_valid_crn(crn)) {
-                cout << "Input Error: illegal CRN" << endl;
-            }
-
-	    else if (!is_valid_department(department)) {
-                cout << "Input Error: illegal department" << endl;
-
-	    }
-
-	    else if (!is_valid_course_number(course_number)) {
-                cout << "Input Error: illegal course number" << endl;
-
-	    }
-
-	    else if (crn_exists(crn)) {
-	      cout << "Fail: cannot build course " << department << course_number << " (CRN: " <<crn<<")"<<endl;
-
-	    }
-	    
-	    else{
-
-	       courses[numCourses].crn = crn;
-               courses[numCourses].department = department;
-               courses[numCourses].number = number;
-               courses[numCourses].name = name;
-               numCourses++;
-	       
-              
-	      cout << "Success: built course " << department << course_number << " (CRN: " << crn << ")" << endl;
-    
-	    }
-	    
-	}
-
-	else if(command == "cancel"){
-	  string crn;
-	  cin >> crn;
-
-	  if (!is_valid_crn(crn)) {
-
-	    cout << "Input Error: illegal CRN" << endl;
-    }
-	  else if (!crn_exists(crn)) {
-
-	    cout << "Fail: CRN " << crn << " does not exist" << endl;
-    }
-	  
-	  else {
-
-	    for (int i = 0; i < numCourses; i++) {
-                    if (courses[i].crn == crn) {
-                        for (int j = i; j < numCourses - 1; j++) {
-                            courses[j] = courses[j + 1];
-                        }
-                        numCourses--;
-		    }
-	    }
-	     cout << "Success: Canceled course " << crn << endl;
-	  }
-	}
-    
-	else if(command == "enroll"){
-
-	  
-	  cin >> bnumber >> userid >> first_name >> last_name;
-	  
-	  if (!is_valid_bnumber(bnumber)) {
-
-	    cout << "Input Error: illegal B number" << endl;
-    }
-	  else if (bnumber_exists(bnumber)) {
-
-	    cout << "Fail: student " << bnumber << " already exists" << endl;
+      
+      
     }
 
-	  else {
-	    
-	    students[numStudents].bnumber = bnumber;
-	    students[numStudents].userid = userid;
-	    students[numStudents].last_name = last_name;
-	    students[numStudents].first_name = first_name;
-	    numStudents++;
-                cout << "Success: Enroll student " << bnumber << " (" << userid << ") " << last_name << ", " << first_name << endl;
+    else if(command == "roster"){
+
+      
     }
 
-	}
+    else if(command == "schedule"){
 
-	else if(command == "add"){
 
-	  cin >> bnumber >> crn;
-
-	  if (!is_valid_bnumber(bnumber)) {
-
-	    cout << "Input Error: illegal B number" << endl;
+      
     }
-	  else if (!is_valid_crn(crn)) {
+       else if (command == "quit") {
 
-	    cout << "Input Error: illegal CRN" << endl;
-    }
-	  else if (!bnumber_exists(bnumber)) {
-
-	    cout << "Fail: student " << bnumber << " does not exist" << endl;
-    }
-	  else if (!crn_exists(crn)) {
-
-	    cout << "Fail: CRN " << crn << " does not exist" << endl;
-    }
-
-	  else {
-	    
-	  
-	cout << "Success: Added student " << bnumber << " to course " << crn << endl;
-
-	  }
-	}
-    
-	else if(command == "drop"){
-
-	  cin >> bnumber >> crn;
-    
-    
-    if (!is_valid_bnumber(bnumber)) {
-        cout << "Input Error: illegal B number" << endl;
-    }
-
-    else if (!is_valid_crn(crn)) {
-
-      cout << "Input Error: illegal CRN" << endl;
-    }
-
-    else if (!bnumber_exists(bnumber)) {
-
-      cout << "Fail: student " << bnumber << " does not exist" << endl;
-    }
-
-    else if (!crn_exists(crn)) {
-
-      cout << "Fail: CRN " << crn << " does not exist" << endl;
+      break;
     }
 
     else {
-       
-      //vector<string>& schedule = students[bnumber].schedule;
-      //schedule.erase(remove(schedule.begin(), schedule.end(), crn), schedule.end());
-        
-       
-      //vector<string>& roster = 
-	  }
 
-	}
-
-	else if(command == "roster"){
-
-
-	}
-
-	else if(command == "schedule"){
-	   cin >> bnumber;
-    if (!is_valid_bnumber(bnumber)) {
-        cout << "Input Error: illegal B number" << endl;
-    } else if (!bnumber_exists(bnumber)) {
-        cout << "Fail: student " << bnumber << " does not exist" << endl;
-    } else {
-        cout << "Schedule for " << bnumber << ":" << endl;
-        for (string crn : students[bnumber].schedule) {
-            Course course = courses[crn];
-            cout << course.department << " " << course.number << " " << course.name << endl;
-        }
+      cout << "Input Error: command not recognized, please try again." << endl;
+      continue;
     }
+  }
 
-
-	}
-
-	else if(command =="quit"){
-
-
-	  break;
-	}
-
-	else{
-
-	  cout <<"Unknown command"<<endl;
-	}
-
-    }
-
-    delete[] students;
-    delete[] courses;
-    return 0;
+  delete[] courses;
+  delete[] students;
+  return 0;
 }
