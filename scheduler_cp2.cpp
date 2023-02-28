@@ -1,4 +1,8 @@
-#include <iostream>
+ string bNumber;
+    string userId;
+    string firstName;
+    string lastName;
+    vector<int> crns; #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
@@ -7,17 +11,19 @@ using namespace std;
 
 
 struct Course {
+    int crn;
     string department;
     int number;
     string name;
-  //vector<string> roster;
+    vector<string> bNumbers;
 };
 
 struct Student {
+    string bNumber;
     string userid;
     string first_name;
     string last_name;
-  //vector<string> schedule;
+    vector<int> crns; 
 };
 
 
@@ -72,6 +78,18 @@ bool is_valid_bnumber(string bnumber) {
     }
     for (char c : bnumber.substr(1)) {
         if (!isdigit(c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isValidUserid(string userid) {
+    if (userid.size() == 0 || !isalpha(userId[0])) {
+        return false;
+    }
+    for (int i = 1; i < userid.size(); i++) {
+        if (!isalnum(userid[i])) {
             return false;
         }
     }
@@ -148,7 +166,8 @@ int main() {
                courses[numCourses].number = number;
                courses[numCourses].name = name;
                numCourses++;
-                cout << "Course added successfully" << endl;
+	       
+              
 	      cout << "Success: built course " << department << course_number << " (CRN: " << crn << ")" << endl;
     
 	    }
@@ -156,6 +175,7 @@ int main() {
 	}
 
 	else if(command == "cancel"){
+	  string crn;
 	  cin >> crn;
 
 	  if (!is_valid_crn(crn)) {
@@ -169,15 +189,23 @@ int main() {
 	  
 	  else {
 
-	    courses.erase(crn);
-	    cout << "Success: Canceled course " << crn << endl;
-    }
+	    for (int i = 0; i < numCourses; i++) {
+                    if (courses[i].crn == crn) {
+                        for (int j = i; j < numCourses - 1; j++) {
+                            courses[j] = courses[j + 1];
+                        }
+                        numCourses--;
+		    }
+	    }
+	     cout << "Success: Canceled course " << crn << endl;
+	  }
 	}
-
+    
 	else if(command == "enroll"){
 
+	  
 	  cin >> bnumber >> userid >> first_name >> last_name;
-
+	  
 	  if (!is_valid_bnumber(bnumber)) {
 
 	    cout << "Input Error: illegal B number" << endl;
@@ -188,14 +216,13 @@ int main() {
     }
 
 	  else {
-        
-        Student student;
-        student.userid = userid;
-        student.first_name = first_name;
-        student.last_name = last_name;
-        students[bnumber] = student;
-        
-        cout << "Enroll student " << bnumber << " (" << userid << ") " << last_name << ", " << first_name << endl;
+	    
+	    students[numStudents].bnumber = bnumber;
+	    students[numStudents].userid = userid;
+	    students[numStudents].last_name = last_name;
+	    students[numStudents].first_name = first_name;
+	    numStudents++;
+                cout << "Success: Enroll student " << bnumber << " (" << userid << ") " << last_name << ", " << first_name << endl;
     }
 
 	}
@@ -222,14 +249,13 @@ int main() {
     }
 
 	  else {
-        
-        schedule.push_back(crn);
-	roster.push_back(bnumber);
+	    
+	  
 	cout << "Success: Added student " << bnumber << " to course " << crn << endl;
 
 	  }
 	}
-	
+    
 	else if(command == "drop"){
 
 	  cin >> bnumber >> crn;
