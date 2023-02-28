@@ -18,6 +18,9 @@ struct Student {
   string userID;
   string firstName;
   string lastName;
+ int num_courses;
+  Course **courses;
+
 };
 
 bool isValidBNumber(string str) {
@@ -95,8 +98,8 @@ int findStudentIndex(Student *students, int numStudents, string bNumber) {
   return -1;
 }
 
-int findCourseIndex(Course *courses, int numCourses, int crn) {
-  for (int i = 0; i < numCourses; i++) {
+int findCourseIndex(Course *courses, int num_courses, int crn) {
+  for (int i = 0; i < num_courses; i++) {
     if (courses[i].crn == crn) {
       return i;
     }
@@ -104,11 +107,43 @@ int findCourseIndex(Course *courses, int numCourses, int crn) {
   return -1;
 }
 
+void add(Student *students, int numStudents, Course *courses, int num_courses,
+         string bNumber, int crn) {
 
+  // Find the student
+  int studentIndex = findStudentIndex(students, numStudents, bNumber);
+  if (studentIndex == -1) {
+    cout << "Fail: student " << bNumber << " not found" << endl;
+    return;
+  }
 
+  // Find the course
+  int courseIndex = findCourseIndex(courses, num_courses, crn);
+  if (courseIndex == -1) {
+    cout << "Fail: course " << crn << " not found" << endl;
+    return;
+  }
 
+  // Check if the student is already enrolled in the course
+  for (int i = 0; i < students[studentIndex].num_courses; i++) {
+    if (students[studentIndex].courses[i] == &courses[courseIndex]) {
+      cout << "Fail: student " << bNumber << " is already enrolled in course "
+           << crn << endl;
+      return;
+    }
+  }
 
-
+  // Add the course to the student's list of courses
+  Course **newCourses = new Course *[students[studentIndex].num_courses + 1];
+  for (int i = 0; i < students[studentIndex].num_courses; i++) {
+    newCourses[i] = students[studentIndex].courses[i];
+  }
+  newCourses[students[studentIndex].num_courses] = &courses[courseIndex];
+  students[studentIndex].num_courses++;
+  delete[] students[studentIndex].courses;
+  students[studentIndex].courses = newCourses;
+  cout << "Success: added course " << crn << " for student " << bNumber << endl;
+}
 
 
 void showPrompt() {
@@ -221,7 +256,9 @@ int main() {
     }
 
     else if (command == "add") {
-
+      int crn;
+      string bNumber;
+      add(students,numStudents,courses,num_courses,bNumber,crn);
 
       }
 
