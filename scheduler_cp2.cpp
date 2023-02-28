@@ -1,8 +1,4 @@
- string bNumber;
-    string userId;
-    string firstName;
-    string lastName;
-    vector<int> crns; #include <iostream>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
