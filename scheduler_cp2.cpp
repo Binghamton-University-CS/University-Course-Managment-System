@@ -46,59 +46,7 @@ bool isValidUserID(string str) {
 }
 
 void build(Course *&courses,int num_courses,int crn,string department, int number,string name ){  
-    string crn_string;
-    string number_string;
-    stringstream ss1;
-    stringstream ss2;
-    ss1<<crn;
-    ss1>>crn_string;
-    ss2<<number;
-    ss2>>number_string;
-
-
-      if (crn_string.empty() || department.empty() || number_string.empty() ||
-      name.empty()) {
-    cout << "Input Error: too few arguments" << endl;
-    return;
-  }
-  
-      for (int i = 0; i < num_courses; i++) {
-        if (courses[i].crn == crn) {
-          cout << "Fail: cannot build course" << name << "(CRN:" << crn
-               << "): CRN exists" << endl;
-          return;
-        }
-      }
-      // Make sure CRN is 6 digits
-      if (crn < 100000 || crn > 999999) {
-        cout << "Invalid CRN" << endl;
-        return;
-      }
-
-      // Make sure department is 2-4 characters
-      if (department.length() < 2 || department.length() > 4) {
-        cout << "Invalid department code" << endl;
-        return;
-      }
-
-      // Make sure number is between 100 and 700
-      if (number < 100 || number > 700) {
-        cout << "Invalid course number" << endl;
-        return;
-      }
-
-      // Add course to array
-  Course newCourse = {crn,department,number,name};
-  Course *newCourses = new Course[num_courses + 1];
-  for (int i = 0; i < num_courses; i++) {
-    newCourses[i] = courses[i];
-  }
-  newCourses[num_courses] = newCourse;
-  num_courses++;
-  delete[] courses;
-  courses = newCourses;
-      cout << "Success: built course " << department << number
-           << " (CRN: " << crn << ")" << endl;
+   
 
   }
   
@@ -164,8 +112,6 @@ int findCourseIndex(Course *courses, int num_courses, int crn) {
 }
 
 
-
-
 void showPrompt() {
   cout << "Enter [\"build <crn> <department> <number> <name>\"" << endl
        << "       \"cancel <crn>\"" << endl
@@ -200,7 +146,59 @@ int main() {
       cin >> crn >> department >> number;
       getline(cin, name);
 
-      build(courses,num_courses,crn,department, number,name);
+       string crn_string;
+    string number_string;
+    stringstream ss1;
+    stringstream ss2;
+    ss1<<crn;
+    ss1>>crn_string;
+    ss2<<number;
+    ss2>>number_string;
+
+
+      if (crn_string.empty() || department.empty() || number_string.empty() ||
+      name.empty()) {
+    cout << "Input Error: too few arguments" << endl;
+    continue;
+  }
+  
+      for (int i = 0; i < num_courses; i++) {
+        if (courses[i].crn == crn) {
+          cout << "Fail: cannot build course" << name << "(CRN:" << crn
+               << "): CRN exists" << endl;
+          continue;
+        }
+      }
+      // Make sure CRN is 6 digits
+      if (crn < 100000 || crn > 999999) {
+        cout << "Invalid CRN" << endl;
+        continue;
+      }
+
+      // Make sure department is 2-4 characters
+      if (department.length() < 2 || department.length() > 4) {
+        cout << "Invalid department code" << endl;
+        continue;
+      }
+
+      // Make sure number is between 100 and 700
+      if (number < 100 || number > 700) {
+        cout << "Invalid course number" << endl;
+        continue;
+      }
+
+      // Add course to array
+  Course newCourse = {crn,department,number,name};
+  Course *newCourses = new Course[num_courses + 1];
+  for (int i = 0; i < num_courses; i++) {
+    newCourses[i] = courses[i];
+  }
+  newCourses[num_courses] = newCourse;
+  num_courses++;
+  delete[] courses;
+  courses = newCourses;
+      cout << "Success: built course " << department << number
+           << " (CRN: " << crn << ")" << endl;
       }
 
     else if (command == "cancel") {
@@ -297,6 +295,36 @@ int main() {
     }
 
     else if (command == "drop") {
+      string bNumber;
+      int crn;
+      cin>>bNumber>>crn;
+      
+  int studentIndex = findStudentIndex(students, numStudents, bNumber);
+  if (studentIndex == -1) {
+    cout << "Fail: cannot drop course CRN " << crn << " for student " << bNumber << ", student not found" << endl;
+    continue;
+  }
+  
+  Student& student = students[studentIndex];
+  int courseIndex = findCourseIndex(courses,num_courses, crn);
+  if (courseIndex == -1) {
+    cout << "Fail: cannot drop course CRN " << crn << " for student " << bNumber << ", course not found" << endl;
+    continue;
+  }
+  
+  Course* course = student.courses[courseIndex];
+  Course** newCourses = new Course*[student.num_courses - 1];
+  for (int i = 0, j = 0; i < student.num_courses; i++) {
+    if (i != courseIndex) {
+      newCourses[j++] = student.courses[i];
+    }
+  }
+  
+  delete course;
+  delete[] student.courses;
+  student.courses = newCourses;
+  student.num_courses--;
+  cout << "Success: dropped course CRN " << crn << " for student " << bNumber << endl;
 
     }
 
