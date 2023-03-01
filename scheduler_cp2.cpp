@@ -329,10 +329,63 @@ void drop(Student *students, int numStudents, string bNumber, int crn) {
       }
   
       else if (command == "roster") {
+        int crn;
+        cin>>crn;
+            if (!isValidCRN(crn)) {
+        cout << "Error: invalid CRN" << endl;
+        continue;
+    }
+
+    int courseIndex = findCourseIndex(courses, num_courses, crn);
+    if (courseIndex == -1) {
+        cout << "Error: CRN not found" << endl;
+        continue;
+    }
+
+    cout << "CRN: " << courses[courseIndex].crn << endl;
+    cout << "Students: ";
+    int count = 0;
+    for (int i = 0; i < numStudents; i++) {
+        for (int j = 0; j < students[i].num_courses; j++) {
+            if (students[i].courses[j]->crn == crn) {
+                count++;
+                cout << students[i].bNumber << " " << students[i].firstName << ", " << students[i].lastName << endl;
+                
+            }
+        }
+    }
   
       }
   
       else if (command == "schedule") {
+        string bNumber;
+        cin>>bNumber;
+          if (!isValidBNumber(bNumber)) {
+    cout << "Input Error: invalid arguments" << endl;
+    continue;
+  }
+  
+  // Find the index of the student with the given B Number
+  int studentIndex = findStudentIndex(students, numStudents, bNumber);
+  if (studentIndex == -1) {
+    cout << "Fail: could not find student with B Number " << bNumber << endl;
+    continue;
+  }
+  
+  // Display the schedule of the student
+  Student student = students[studentIndex];
+  cout << "Student: " << student.bNumber << ": " << student.firstName << " " << student.lastName << endl;
+  if (student.num_courses == 0) {
+    cout << "No courses" << endl;
+  } else {
+    for (int i = 0; i < student.num_courses; i++) {
+      Course *course = student.courses[i];
+      cout << course->crn << " " << course->department << " " << course->number << " " << course->name << endl;
+    }
+  }
+
+
+        
   
       } else if (command == "quit") {
   
