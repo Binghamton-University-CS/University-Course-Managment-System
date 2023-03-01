@@ -45,6 +45,66 @@ bool isValidUserID(string str) {
   return true;
 }
 
+void build(Course *&courses,int num_courses,int crn,string department, int number,string name ){  
+    string crn_string;
+    string number_string;
+    stringstream ss1;
+    stringstream ss2;
+    ss1<<crn;
+    ss1>>crn_string;
+    ss2<<number;
+    ss2>>number_string;
+
+
+      if (crn_string.empty() || department.empty() || number_string.empty() ||
+      name.empty()) {
+    cout << "Input Error: too few arguments" << endl;
+    return;
+  }
+  
+      for (int i = 0; i < num_courses; i++) {
+        if (courses[i].crn == crn) {
+          cout << "Fail: cannot build course" << name << "(CRN:" << crn
+               << "): CRN exists" << endl;
+          return;
+        }
+      }
+      // Make sure CRN is 6 digits
+      if (crn < 100000 || crn > 999999) {
+        cout << "Invalid CRN" << endl;
+        return;
+      }
+
+      // Make sure department is 2-4 characters
+      if (department.length() < 2 || department.length() > 4) {
+        cout << "Invalid department code" << endl;
+        return;
+      }
+
+      // Make sure number is between 100 and 700
+      if (number < 100 || number > 700) {
+        cout << "Invalid course number" << endl;
+        return;
+      }
+
+      // Add course to array
+  Course newCourse = {crn,department,number,name};
+  Course *newCourses = new Course[num_courses + 1];
+  for (int i = 0; i < num_courses; i++) {
+    newCourses[i] = courses[i];
+  }
+  newCourses[num_courses] = newCourse;
+  num_courses++;
+  delete[] courses;
+  courses = newCourses;
+      cout << "Success: built course " << department << number
+           << " (CRN: " << crn << ")" << endl;
+
+  }
+  
+
+  
+
 void enroll(Student *&students, int &numStudents, string bNumber, string userID,
             string firstName, string lastName) {
 
@@ -103,55 +163,8 @@ int findCourseIndex(Course *courses, int num_courses, int crn) {
   return -1;
 }
 
-void add(Student *students, int numStudents, Course *courses, int num_courses,
-         string bNumber, int crn) {
 
-  int courseIndex = findCourseIndex(courses, num_courses, crn);
-  if (courseIndex == -1) {
-    cout << "Fail: course " << crn << " not found" << endl;
-    return;
-  }
-  // Find the student
-  int studentIndex = findStudentIndex(students, numStudents, bNumber);
-  if (studentIndex == -1) {
-    cout << "Fail: student " << bNumber << " not found" << endl;
-    return;
-  }
 
-  // Find the course
-
-  // Check if the student is already enrolled in the course
-  for (int i = 0; i < students[studentIndex].num_courses; i++) {
-    if (students[studentIndex].courses[i]->crn == crn) {
-      cout << "Fail: student " << bNumber << " is already enrolled in course "
-           << crn << endl;
-      return;
-    }
-  }
-
-  // Create a new array of course pointers with space for one more course
-  Course **newCourseList = new Course *[students[studentIndex].num_courses + 1];
-
-  // Copy over the old course pointers
-  for (int i = 0; i < students[studentIndex].num_courses; i++) {
-    newCourseList[i] = students[studentIndex].courses[i];
-  }
-
-  // Add the new course pointer to the end of the array
-  newCourseList[students[studentIndex].num_courses] = &courses[courseIndex];
-
-  // Deallocate the old course pointer array
-  delete[] students[studentIndex].courses;
-
-  // Update the student's course pointer array to point to the new array
-  students[studentIndex].courses = newCourseList;
-
-  // Increment the student's number of courses
-  students[studentIndex].num_courses++;
-
-  cout << "Success: added course " << crn << " for student " << bNumber << endl;
-  return;
-}
 
 void showPrompt() {
   cout << "Enter [\"build <crn> <department> <number> <name>\"" << endl
@@ -187,45 +200,8 @@ int main() {
       cin >> crn >> department >> number;
       getline(cin, name);
 
-      for (int i = 0; i < num_courses; i++) {
-        if (courses[i].crn == crn) {
-          cout << "Fail: cannot build course" << name << "(CRN:" << crn
-               << "): CRN exists" << endl;
-          continue;
-        }
+      build(courses,num_courses,crn,department, number,name);
       }
-      // Make sure CRN is 6 digits
-      if (crn < 100000 || crn > 999999) {
-        cout << "Invalid CRN" << endl;
-        continue;
-      }
-
-      // Make sure department is 2-4 characters
-      if (department.length() < 2 || department.length() > 4) {
-        cout << "Invalid department code" << endl;
-        continue;
-      }
-
-      // Make sure number is between 100 and 700
-      if (number < 100 || number > 700) {
-        cout << "Invalid course number" << endl;
-        continue;
-      }
-
-      // Add course to array
-  Course newCourse = {crn,department,number,name};
-  Course *newCourses = new Course[num_courses + 1];
-  for (int i = 0; i < num_courses; i++) {
-    newCourses[i] = courses[i];
-  }
-  newCourses[num_courses] = newCourse;
-  num_courses++;
-  delete[] courses;
-  courses = newCourses;
-      cout << "Success: built course " << department << number
-           << " (CRN: " << crn << ")" << endl;
-
-    }
 
     else if (command == "cancel") {
       int crn;
@@ -265,10 +241,58 @@ int main() {
     }
 
     else if (command == "add") {
-      int crn;
-      string bNumber;
-      cin >> crn >> bNumber;
-      add(students, numStudents, courses, num_courses, bNumber, crn);
+      string bNumber, crn;
+    cin >> bNumber >> crn;
+    
+    // Check if the bNumber is valid
+    if (bNumber.length() != 9 || bNumber[0] != 'B') {
+        cout << "Fail: invalid bNumber" << endl;
+        continue;
+    }
+    
+    // Check if the crn is valid
+    if (crn.length() != 6) {
+        cout << "Fail: invalid CRN" << endl;
+        continue;
+    }
+    
+    // Check if the student is already enrolled in the course
+    for (int i = 0; i < numStudents; i++) {
+        if (students[i].bNumber == bNumber) {
+            for (int j = 0; j < students[i].num_courses; j++) {
+                if (students[i].courses[j]->crn == stoi(crn)) {
+                    cout << "Fail: cannot add, student " << bNumber << " already enrolled in course " << crn << endl;
+                    continue;
+                }
+            }
+        }
+    }
+    
+    
+    // Find the course with the matching CRN
+    //Course* course = nullptr;
+    for (int i = 0; i < num_courses; i++) {
+        if (courses[i].crn == stoi(crn)) {
+            courses = &courses[i];
+            
+        }
+    }
+    if (courses == nullptr) {
+        cout << "Fail: course not found" << endl;
+        continue;
+    }
+    
+    // Add the course to the student's course list
+    Course** new_courses = new Course*[students->num_courses + 1];
+    for (int i = 0; i < students->num_courses; i++) {
+        new_courses[i] = students->courses[i];
+    }
+    new_courses[students->num_courses] = courses;
+    delete[] students->courses;
+    students->courses = new_courses;
+    students->num_courses++;
+    
+    cout << "Success: added student " << bNumber << " into course " << crn << endl;
 
     }
 
@@ -290,11 +314,10 @@ int main() {
     else {
 
       cout << "Input Error: command not recognized, please try again." << endl;
+      continue;
     }
   }
 
-  delete[] courses;
-  delete[] students;
   return 0;
 }
 
