@@ -10,7 +10,6 @@ struct Course {
   string department;
   int number;
   string name;
-
 };
 
 struct Student {
@@ -18,9 +17,8 @@ struct Student {
   string userID;
   string firstName;
   string lastName;
- int num_courses;
-  Course **courses;
-
+  int num_courses;
+  Course **courses = nullptr;
 };
 
 bool isValidBNumber(string str) {
@@ -85,9 +83,7 @@ void enroll(Student *&students, int &numStudents, string bNumber, string userID,
        << newStudent.firstName << endl;
 }
 
-bool isValidCRN(int crn) {
-  return (crn >= 100000 && crn <= 999999);
-}
+bool isValidCRN(int crn) { return (crn >= 100000 && crn <= 999999); }
 
 int findStudentIndex(Student *students, int numStudents, string bNumber) {
   for (int i = 0; i < numStudents; i++) {
@@ -110,6 +106,11 @@ int findCourseIndex(Course *courses, int num_courses, int crn) {
 void add(Student *students, int numStudents, Course *courses, int num_courses,
          string bNumber, int crn) {
 
+  int courseIndex = findCourseIndex(courses, num_courses, crn);
+  if (courseIndex == -1) {
+    cout << "Fail: course " << crn << " not found" << endl;
+    return;
+  }
   // Find the student
   int studentIndex = findStudentIndex(students, numStudents, bNumber);
   if (studentIndex == -1) {
@@ -118,33 +119,39 @@ void add(Student *students, int numStudents, Course *courses, int num_courses,
   }
 
   // Find the course
-  int courseIndex = findCourseIndex(courses, num_courses, crn);
-  if (courseIndex == -1) {
-    cout << "Fail: course " << crn << " not found" << endl;
-    return;
-  }
 
   // Check if the student is already enrolled in the course
   for (int i = 0; i < students[studentIndex].num_courses; i++) {
-    if (students[studentIndex].courses[i] == &courses[courseIndex]) {
+    if (students[studentIndex].courses[i]->crn == crn) {
       cout << "Fail: student " << bNumber << " is already enrolled in course "
            << crn << endl;
       return;
     }
   }
 
-  // Add the course to the student's list of courses
-  Course **newCourses = new Course *[students[studentIndex].num_courses + 1];
-  for (int i = 0; i < students[studentIndex].num_courses; i++) {
-    newCourses[i] = students[studentIndex].courses[i];
-  }
-  newCourses[students[studentIndex].num_courses] = &courses[courseIndex];
-  students[studentIndex].num_courses++;
-  delete[] students[studentIndex].courses;
-  students[studentIndex].courses = newCourses;
-  cout << "Success: added course " << crn << " for student " << bNumber << endl;
-}
+  // Create a new array of course pointers with space for one more course
+  Course **newCourseList = new Course *[students[studentIndex].num_courses + 1];
 
+  // Copy over the old course pointers
+  for (int i = 0; i < students[studentIndex].num_courses; i++) {
+    newCourseList[i] = students[studentIndex].courses[i];
+  }
+
+  // Add the new course pointer to the end of the array
+  newCourseList[students[studentIndex].num_courses] = &courses[courseIndex];
+
+  // Deallocate the old course pointer array
+  delete[] students[studentIndex].courses;
+
+  // Update the student's course pointer array to point to the new array
+  students[studentIndex].courses = newCourseList;
+
+  // Increment the student's number of courses
+  students[studentIndex].num_courses++;
+
+  cout << "Success: added course " << crn << " for student " << bNumber << endl;
+  return;
+}
 
 void showPrompt() {
   cout << "Enter [\"build <crn> <department> <number> <name>\"" << endl
@@ -180,6 +187,13 @@ int main() {
       cin >> crn >> department >> number;
       getline(cin, name);
 
+      for (int i = 0; i < num_courses; i++) {
+        if (courses[i].crn == crn) {
+          cout << "Fail: cannot build course" << name << "(CRN:" << crn
+               << "): CRN exists" << endl;
+          continue;
+        }
+      }
       // Make sure CRN is 6 digits
       if (crn < 100000 || crn > 999999) {
         cout << "Invalid CRN" << endl;
@@ -199,23 +213,18 @@ int main() {
       }
 
       // Add course to array
-      if (num_courses == max_courses) {
-        max_courses = max(max_courses * 2, 1);
-        Course *new_courses = new Course[max_courses];
-        for (int i = 0; i < num_courses; i++) {
-          new_courses[i] = courses[i];
-        }
-        delete[] courses;
-        courses = new_courses;
-      }
-
-      courses[num_courses].crn = crn;
-      courses[num_courses].department = department;
-      courses[num_courses].number = number;
-      courses[num_courses].name = name;
-      num_courses++;
+  Course newCourse = {crn,department,number,name};
+  Course *newCourses = new Course[num_courses + 1];
+  for (int i = 0; i < num_courses; i++) {
+    newCourses[i] = courses[i];
+  }
+  newCourses[num_courses] = newCourse;
+  num_courses++;
+  delete[] courses;
+  courses = newCourses;
       cout << "Success: built course " << department << number
            << " (CRN: " << crn << ")" << endl;
+
     }
 
     else if (command == "cancel") {
@@ -258,28 +267,22 @@ int main() {
     else if (command == "add") {
       int crn;
       string bNumber;
-      add(students,numStudents,courses,num_courses,bNumber,crn);
+      cin >> crn >> bNumber;
+      add(students, numStudents, courses, num_courses, bNumber, crn);
 
-      }
-
-    
-    else if(command == "drop"){
-
-      
-      
     }
 
-    else if(command == "roster"){
+    else if (command == "drop") {
 
-      
     }
 
-    else if(command == "schedule"){
+    else if (command == "roster") {
 
-
-      
     }
-       else if (command == "quit") {
+
+    else if (command == "schedule") {
+
+    } else if (command == "quit") {
 
       break;
     }
@@ -287,7 +290,6 @@ int main() {
     else {
 
       cout << "Input Error: command not recognized, please try again." << endl;
-      continue;
     }
   }
 
@@ -295,3 +297,69 @@ int main() {
   delete[] students;
   return 0;
 }
+
+/*#include <iostream>
+using namespace std;
+
+class CourseInfo {
+        private:
+                string crn;
+                string department;
+                int number;
+                string name;
+                // No roster
+};
+
+class StudentInfo {
+        private:
+                string bnumber;
+                string first, last;
+                // No  schedule
+};
+
+class CourseInfoList {
+        private:
+                CourseInfo *infoList;
+                int num_courses;
+                int capacity;
+};
+
+class StudentInfoList {
+        private:
+                StudentInfo *infoList;
+                int num_students;
+                int capacity;
+};
+
+class Course {
+        private:
+                CourseInfo info;
+                StudentInfoList roster;
+};
+
+class Student {
+        private:
+                StudentInfo student;
+                CourseInfoList schedule;
+
+};
+
+class CourseList {
+        private:
+                Course *courses;
+                int num_courses;
+                int capacity;
+};
+
+class StudentList {
+        private:
+                Student *students;
+                int num_students;
+                int capacity;
+};
+
+int main() {
+        StudentList all_students;
+        CourseList all_courses;
+}
+*/
