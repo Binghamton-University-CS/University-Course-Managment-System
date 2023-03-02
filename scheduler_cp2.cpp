@@ -47,43 +47,6 @@
   
     
   
-  void enroll(Student *&students, int &numStudents, string bNumber, string userID,
-              string firstName, string lastName) {
-  
-    if (bNumber.empty() || userID.empty() || firstName.empty() ||
-        lastName.empty()) {
-      cout << "Input Error: too few arguments" << endl;
-      return;
-    }
-    // Check if the B Number already exists
-    for (int i = 0; i < numStudents; i++) {
-      if (students[i].bNumber == bNumber) {
-        cout << "Fail: cannot enroll student, B Number exists" << endl;
-        return;
-      }
-    }
-  
-    // Check if the input arguments are valid
-    if (!isValidBNumber(bNumber) || !isValidUserID(userID) || firstName.empty() ||
-        lastName.empty()) {
-      cout << "Input Error: invalid arguments" << endl;
-      return;
-    }
-  
-    // Create a new student and add it to the dynamic array
-    Student newStudent = {bNumber, userID, firstName, lastName};
-    Student *newStudents = new Student[numStudents + 1];
-    for (int i = 0; i < numStudents; i++) {
-      newStudents[i] = students[i];
-    }
-    newStudents[numStudents] = newStudent;
-    numStudents++;
-    delete[] students;
-    students = newStudents;
-    cout << "Success: enrolled student " << newStudent.bNumber << " ("
-         << newStudent.userID << ") " << newStudent.lastName << ", "
-         << newStudent.firstName << endl;
-  }
   
   bool isValidCRN(int crn) { return (crn >= 100000 && crn <= 999999); }
   
@@ -126,7 +89,7 @@
     Student *students = nullptr;
     int numStudents = 0;
     int num_courses = 0;
-    int max_courses = 0;
+  
   
     showPrompt();
   
@@ -159,7 +122,7 @@
       continue;
     }
     
-         bool crn_exists = false;
+  bool crn_exists = false;
   for (int i = 0; i < num_courses; i++) {
     if (courses[i].crn == crn) {
       crn_exists = true;
@@ -236,7 +199,39 @@
       } else if (command == "enroll") {
         string bNumber, userID, firstName, lastName;
         cin >> bNumber >> userID >> firstName >> lastName;
-        enroll(students, numStudents, bNumber, userID, firstName, lastName);
+       if (bNumber.empty() || userID.empty() || firstName.empty() ||
+        lastName.empty()) {
+      cout << "Input Error: too few arguments" << endl;
+      continue;
+    }
+    // Check if the B Number already exists
+    for (int i = 0; i < numStudents; i++) {
+      if (students[i].bNumber == bNumber) {
+        cout << "Fail: cannot enroll student, B Number exists" << endl;
+        continue;
+      }
+    }
+  
+    // Check if the input arguments are valid
+    if (!isValidBNumber(bNumber) || !isValidUserID(userID) || firstName.empty() ||
+        lastName.empty()) {
+      cout << "Input Error: invalid arguments" << endl;
+      continue;
+    }
+  
+    // Create a new student and add it to the dynamic array
+    Student newStudent = {bNumber, userID, firstName, lastName};
+    Student *newStudents = new Student[numStudents + 1];
+    for (int i = 0; i < numStudents; i++) {
+      newStudents[i] = students[i];
+    }
+    newStudents[numStudents] = newStudent;
+    numStudents++;
+    delete[] students;
+    students = newStudents;
+    cout << "Success: enrolled student " << newStudent.bNumber << " ("
+         << newStudent.userID << ") " << newStudent.lastName << ", "
+         << newStudent.firstName << endl;
   
       }
   
@@ -277,10 +272,18 @@
               
           }
       }
-      if (courses == nullptr) {
-          cout << "Fail: course not found" << endl;
-          continue;
-      }
+  bool crn_exists = true;
+  for (int i = 0; i < num_courses; i++) {
+    if (courses[i].crn == stoi(crn)) {
+      crn_exists = false;
+      cout << "Fail: course not found"<< endl;
+      break;
+    }
+  }
+  if (crn_exists) {
+    continue;
+  }
+
       
       // Add the course to the student's course list
       Course** new_courses = new Course*[students->num_courses + 1];
