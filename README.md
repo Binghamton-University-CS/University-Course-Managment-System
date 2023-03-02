@@ -1,18 +1,21 @@
-This code defines a program that manages courses and student enrollment.
+This program simulates a basic course enrollment system, allowing the user to build and cancel courses, enroll and drop students from courses, and view a course roster or student schedule.
 
-First, it defines two structures, Course and Student, that represent the properties of a course and a student, respectively. Then, it defines several helper functions that check the validity of input strings or integers: isValidBNumber checks if a string is a valid B Number, isValidUserID checks if a string is a valid user ID, isValidCRN checks if an integer is a valid course registration number, findStudentIndex finds the index of a student with a given B Number in an array of students, and findCourseIndex finds the index of a course with a given CRN in an array of courses.
+The program uses two structs, Course and Student, to represent a course and a student, respectively. A Course has a CRN, department, course number, and name, while a Student has a B-number, user ID, first name, last name, and a dynamic array of pointers to courses. The array of courses is dynamically allocated so that a Student can be enrolled in any number of courses.
 
-The enroll function adds a new student to an array of students, if the input arguments are valid and the student does not already exist in the array. It first checks if any of the input arguments are empty, and if so, it prints an error message and returns. Then, it checks if a student with the same B Number already exists in the array, and if so, it prints an error message and returns. Finally, it creates a new student object, adds it to a new array of students (with size one greater than the original array), and deletes the original array.
+The main function of the program repeatedly prompts the user for a command and executes the corresponding action until the user enters "quit". The program uses several helper functions to perform input validation and search for elements within the Course and Student arrays.
 
-The showPrompt function prints out a set of commands that the user can enter into the program, along with the expected input format for each command.
+The "build" command allows the user to add a new Course to the array. The user must enter a valid CRN, department, course number, and name, and the program checks that the CRN does not already exist before adding the new Course to the array.
 
-The main function initializes several variables and starts a loop that reads in user input from the console. Depending on the input command, it performs different operations on an array of courses and an array of students. The possible commands are:
+The "cancel" command allows the user to remove a Course from the array by its CRN. If the CRN is not found in the array, the program prints a failure message.
 
-build: adds a new course to the array of courses, with a given CRN, department, course number, and name. If any of the input arguments are invalid, it prints an error message and continues to the next iteration of the loop.
-cancel: removes a course from the array of courses with a given CRN.
-enroll: adds a new student to the array of students, with a given B Number, user ID, first name, and last name. If any of the input arguments are invalid, it prints an error message and continues to the next iteration of the loop.
-add: enrolls a student in a course, given their B Number and the CRN of the course. If the student or course do not exist, or if the student is already enrolled in the course, it prints an error message.
-drop: removes a student from a course, given their B Number and the CRN of the course. If the student or course do not exist, or if the student is not enrolled in the course, it prints an error message.
-roster: prints out a list of all students enrolled in a course, given the CRN of the course.
-schedule: prints out a list of all courses in which a student is enrolled, given their B Number.
-quit: exits the program.
+The "enroll" command allows the user to add a new Student to the array and enroll them in one or more Courses. The user must enter a valid B-number, user ID, first name, and last name, and the program dynamically allocates a new array of pointers to courses for the new Student. The program then prompts the user to enter the CRNs of the Courses to enroll the Student in, and adds the corresponding Course pointers to the Student's array.
+
+The "add" command allows the user to enroll an existing Student in an additional Course. The user must enter a valid B-number and CRN, and the program searches for the Student and Course in the arrays before adding the Course pointer to the Student's array.
+
+The "drop" command allows the user to remove a Course from an existing Student's array. The user must enter a valid B-number and CRN, and the program searches for the Student and Course in the arrays before removing the Course pointer from the Student's array.
+
+The "roster" command allows the user to view a list of Students enrolled in a specific Course. The user must enter a valid CRN, and the program searches for the Course in the array before printing the list of Students.
+
+The "schedule" command allows the user to view a list of Courses that an existing Student is enrolled in. The user must enter a valid B-number, and the program searches for the Student in the array before printing the list of Courses.
+
+Overall, this program provides a basic implementation of a course enrollment system, with functionality to add and remove Courses and Students, enroll and drop Students from Courses, and view rosters and schedules.
