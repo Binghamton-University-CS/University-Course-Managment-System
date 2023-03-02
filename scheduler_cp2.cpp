@@ -2,7 +2,8 @@
   #include <sstream>
   #include <string>
   #include <vector>
-  
+  #include <cstring>
+
   using namespace std;
   
   struct Course {
@@ -91,9 +92,10 @@
     int num_courses = 0;
   
   
-    showPrompt();
+    
   
     while (true) {
+      showPrompt();
       string command;
       cin >> command;
   
@@ -102,11 +104,12 @@
         string department;
         int number;
         string name;
+        
   
         cin >> crn >> department >> number;
         getline(cin, name);
   
-         string crn_string;
+      string crn_string;
       string number_string;
       stringstream ss1;
       stringstream ss2;
@@ -114,6 +117,15 @@
       ss1>>crn_string;
       ss2<<number;
       ss2>>number_string;
+
+        for(int i=0;i<department.size();i++){
+          if (department[i]== tolower(department[i])){
+
+            cout<<"Input Error: illegal department"<<endl;
+            break;
+          }
+          continue;
+        }
   
   
         if (crn_string.empty() || department.empty() || number_string.empty() ||
@@ -122,7 +134,7 @@
       continue;
     }
     
-         bool crn_exists = false;
+  bool crn_exists = false;
   for (int i = 0; i < num_courses; i++) {
     if (courses[i].crn == crn) {
       crn_exists = true;
@@ -140,13 +152,11 @@
           continue;
         }
   
-        // Make sure department is 2-4 characters
         if (department.length() < 2 || department.length() > 4) {
           cout << "Input Error: illegal department" << endl;
           continue;
         }
   
-        // Make sure number is between 100 and 700
         if (number < 100 || number > 700) {
           cout << "Input Error: illegal course number" << endl;
           continue;
@@ -170,17 +180,15 @@
         int crn;
         cin >> crn;
   
-        // Make sure CRN is 6 digits
         if (crn < 100000 || crn > 999999) {
           cout << "Input Error: illegal CRN" << endl;
           continue;
         }
   
-        // Search for course with given CRN
+        // Search for course  CRN
         bool found = false;
         for (int i = 0; i < num_courses; i++) {
           if (courses[i].crn == crn) {
-            // Shift courses after the removed course down in the array
             for (int j = i; j < num_courses - 1; j++) {
               courses[j] = courses[j + 1];
             }
@@ -212,7 +220,7 @@
       }
     }
   
-    // Check if the input arguments are valid
+    
     if (!isValidBNumber(bNumber) || !isValidUserID(userID) || firstName.empty() ||
         lastName.empty()) {
       cout << "Input Error: invalid arguments" << endl;
@@ -236,26 +244,23 @@
       }
   
       else if (command == "add") {
-        string bNumber, crn;
+        string bNumber;
+        int crn;
       cin >> bNumber >> crn;
       
-      // Check if the bNumber is valid
       if (bNumber.length() != 9 || bNumber[0] != 'B') {
           cout << "Fail: invalid bNumber" << endl;
           continue;
       }
-      
-      // Check if the crn is valid
-      if (crn.length() != 6) {
-          cout << "Fail: invalid CRN" << endl;
+       if (crn < 100000 || crn > 999999) {
+          cout << "Input Error: illegal CRN" << endl;
           continue;
-      }
-      
-      // Check if the student is already enrolled in the course
+        }
+
       for (int i = 0; i < numStudents; i++) {
           if (students[i].bNumber == bNumber) {
               for (int j = 0; j < students[i].num_courses; j++) {
-                  if (students[i].courses[j]->crn == stoi(crn)) {
+                  if (students[i].courses[j]->crn == crn) {
                       cout << "Fail: cannot add, student " << bNumber << " already enrolled in course " << crn << endl;
                       continue;
                   }
@@ -264,18 +269,25 @@
       }
       
       
-      // Find the course with the matching CRN
       //Course* course = nullptr;
       for (int i = 0; i < num_courses; i++) {
-          if (courses[i].crn == stoi(crn)) {
+          if (courses[i].crn == crn) {
               courses = &courses[i];
               
           }
       }
-      if (courses == nullptr) {
-          cout << "Fail: course not found" << endl;
-          continue;
-      }
+  bool crn_exists = false;
+  for (int i = 0; i < num_courses; i++) {
+    if (courses[i].crn != crn) {
+      crn_exists = true;
+      cout << "Fail: course not found"<< endl;
+      break;
+    }
+  }
+  if (crn_exists) {
+    continue;
+  }
+
       
       // Add the course to the student's course list
       Course** new_courses = new Course*[students->num_courses + 1];
@@ -292,7 +304,7 @@
       }
   
       else if (command == "drop") {
-        string bNumber;
+        string  bNumber;
         int crn;
         cin>>bNumber>>crn;
         
@@ -335,7 +347,10 @@
     }
 
     cout << "CRN: " << courses[courseIndex].crn << endl;
-    cout << "Students: ";
+    if(numStudents==0){
+    cout << "Students: "<<numStudents<<endl;
+      }
+        
     int count = 0;
     for (int i = 0; i < numStudents; i++) {
         for (int j = 0; j < students[i].num_courses; j++) {
@@ -364,7 +379,6 @@
     continue;
   }
   
-  // Display the schedule of the student
   Student student = students[studentIndex];
   cout << "Student: " << student.bNumber << ": " << student.firstName << " " << student.lastName << endl;
   if (student.num_courses == 0) {
@@ -375,9 +389,6 @@
       cout << course->crn << " " << course->department << " " << course->number << " " << course->name << endl;
     }
   }
-
-
-        
   
       } else if (command == "quit") {
   
