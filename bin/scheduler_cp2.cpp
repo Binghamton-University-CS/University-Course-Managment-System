@@ -47,6 +47,11 @@
   
     
   
+  void enroll(Student *&students, int &numStudents, string bNumber, string userID,
+              string firstName, string lastName) {
+  
+    
+  }
   
   bool isValidCRN(int crn) { return (crn >= 100000 && crn <= 999999); }
   
