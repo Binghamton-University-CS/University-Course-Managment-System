@@ -15,7 +15,7 @@ BIN = bin
 OBJ = obj
 
 all: $(BIN)/$(EXE)
-	.\$(BIN)/$(EXE)
+	
 
 $(BIN)/$(EXE): $(OBJ)/scheduler_cp2.o
 	$(CC) $(FLAGS) $(OBJ)/scheduler_cp2.o -o $@
