@@ -45,12 +45,6 @@
     return true;
   }
   
-  void build(Course *&courses,int num_courses,int crn,string department, int number,string name ){  
-     
-  
-    }
-    
-  
     
   
   void enroll(Student *&students, int &numStudents, string bNumber, string userID,
@@ -111,9 +105,7 @@
     return -1;
   }
 
-void drop(Student *students, int numStudents, string bNumber, int crn) {
-   
-}
+
 
   
   
@@ -167,28 +159,33 @@ void drop(Student *students, int numStudents, string bNumber, int crn) {
       continue;
     }
     
-        for (int i = 0; i < num_courses; i++) {
-          if (courses[i].crn == crn) {
-            cout << "Fail: cannot build course" << name << "(CRN:" << crn
-                 << "): CRN exists" << endl;
-            continue;
-          }
-        }
+         bool crn_exists = false;
+  for (int i = 0; i < num_courses; i++) {
+    if (courses[i].crn == crn) {
+      crn_exists = true;
+      cout << "Fail: cannot build course " << name << " (CRN:" << crn
+           << "): CRN exists" << endl;
+      break;
+    }
+  }
+  if (crn_exists) {
+    continue;
+  }
         // Make sure CRN is 6 digits
         if (crn < 100000 || crn > 999999) {
-          cout << "Invalid CRN" << endl;
+          cout << "Input Error: illegal CRN" << endl;
           continue;
         }
   
         // Make sure department is 2-4 characters
         if (department.length() < 2 || department.length() > 4) {
-          cout << "Invalid department code" << endl;
+          cout << "Input Error: illegal department" << endl;
           continue;
         }
   
         // Make sure number is between 100 and 700
         if (number < 100 || number > 700) {
-          cout << "Invalid course number" << endl;
+          cout << "Input Error: illegal course number" << endl;
           continue;
         }
   
