@@ -210,43 +210,28 @@
       }
   
       else if (command == "add") {
-        string bNumber;
-        int crn;
-      cin >> bNumber >> crn;
-      
-     int courseIndex = findCourse(courses, num_courses, crn);
-  if (courseIndex == -1) {
-    cout << "Fail: cannot add course " << crn << " to " << bNumber << " (course does not exist)" << endl;
-    continue;
-  }
-
-  // Find the student
-  int studentIndex = findStudent(students, numStudents, bNumber);
-  if (studentIndex == -1) {
-    cout << "Fail: cannot add course " << crn << " to " << bNumber << " (student does not exist)" << endl;
-    continue;
-  }
-
-  // Check if the student is already enrolled in the course
-  for (int i = 0; i < students[studentIndex].num_courses; i++) {
-    if (students[studentIndex].courses[i]->crn == crn) {
-      cout << "Fail: cannot add course " << crn << " to " << bNumber << " (already enrolled)" << endl;
+          string bNumber;
+    int crn;
+    cin >> bNumber >> crn;
+    int studentIndex = findStudent(students, numStudents, bNumber);
+    if (studentIndex == -1) {
+      cout << "Fail: could not add course, student not found" << endl;
       continue;
     }
-  }
-
-  // Add the course to the student's course list
-  Course* newCourse = &courses[courseIndex];
-  Course** newCourses = new Course*[students[studentIndex].num_courses + 1];
-  for (int i = 0; i < students[studentIndex].num_courses; i++) {
-    newCourses[i] = students[studentIndex].courses[i];
-  }
-  newCourses[students[studentIndex].num_courses] = newCourse;
-  students[studentIndex].num_courses++;
-  delete[] students[studentIndex].courses;
-  students[studentIndex].courses = newCourses;
-
-  cout << "Success: added course " << crn << " to " << bNumber << endl;
+    int courseIndex = findCourse(courses, num_courses, crn);
+    if (courseIndex == -1) {
+      cout << "Fail: could not add course, course not found" << endl;
+      continue;
+    }
+    Student& student = students[studentIndex];
+    Course** newCourses = new Course*[student.num_courses + 1];
+    for (int i = 0; i < student.num_courses; i++) {
+      newCourses[i] = student.courses[i];
+    }
+    newCourses[student.num_courses] = &courses[courseIndex];
+    student.courses = newCourses;
+    student.num_courses++;
+    cout << "Success: added course " << crn << " to student " << bNumber << endl;
       }
   
       else if (command == "drop") {
@@ -326,6 +311,7 @@
   }
   
   Student student = students[studentIndex];
+  cout << endl;
   cout << "Student: " << student.bNumber << ": " << student.firstName << " " << student.lastName << endl;
   if (student.num_courses == 0) {
     cout << "No courses" << endl;
