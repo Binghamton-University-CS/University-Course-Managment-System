@@ -214,66 +214,39 @@
         int crn;
       cin >> bNumber >> crn;
       
-      if (bNumber.length() != 9 || bNumber[0] != 'B') {
-          cout << "Fail: invalid bNumber" << endl;
-          continue;
-      }
-       if (crn < 100000 || crn > 999999) {
-          cout << "Input Error: illegal CRN" << endl;
-          continue;
-        }
+     int courseIndex = findCourse(courses, num_courses, crn);
+  if (courseIndex == -1) {
+    cout << "Fail: cannot add course " << crn << " to " << bNumber << " (course does not exist)" << endl;
+    continue;
+  }
 
-      for (int i = 0; i < numStudents; i++) {
-          if (students[i].bNumber == bNumber) {
-              for (int j = 0; j < students[i].num_courses; j++) {
-                  if (students[i].courses[j]->crn == crn) {
-                      cout << "Fail: cannot add, student " << bNumber << " already enrolled in course " << crn << endl;
-                      continue;
-                  }
-              }
-          }
-      }
-      
-      
-      //Course* course = nullptr;
-      /*bool crn_exists = false;
-  for (int i = 0; i < num_courses; i++) {
-    if (courses[i].crn != crn) {
-      crn_exists = true;
-      cout << "Fail: course not found"<< endl;
-      break;
+  // Find the student
+  int studentIndex = findStudent(students, numStudents, bNumber);
+  if (studentIndex == -1) {
+    cout << "Fail: cannot add course " << crn << " to " << bNumber << " (student does not exist)" << endl;
+    continue;
+  }
+
+  // Check if the student is already enrolled in the course
+  for (int i = 0; i < students[studentIndex].num_courses; i++) {
+    if (students[studentIndex].courses[i]->crn == crn) {
+      cout << "Fail: cannot add course " << crn << " to " << bNumber << " (already enrolled)" << endl;
+      continue;
     }
   }
-  if (crn_exists) {
-    continue;
-    }*/
-    int studentIndex = findStudent(students, numStudents, bNumber);
-  if (studentIndex == -1) {
-    cout << "Fail: cannot add, student " << bNumber << " not found" << endl;
-    continue;
-  }
 
-  // Search for course by crn
-  int courseIndex = findCourse(courses, num_courses, crn);
-  if (courseIndex == -1) {
-    cout << "Fail: cannot add, course " << crn << " not found" << endl;
-    continue;
+  // Add the course to the student's course list
+  Course* newCourse = &courses[courseIndex];
+  Course** newCourses = new Course*[students[studentIndex].num_courses + 1];
+  for (int i = 0; i < students[studentIndex].num_courses; i++) {
+    newCourses[i] = students[studentIndex].courses[i];
   }
-      
-      
-      // Add the course to the student's course list
-      Course** new_courses = new Course*[students->num_courses + 1];
-      for (int i = 0; i < students->num_courses; i++) {
-          new_courses[i] = students->courses[i];
-      }
-      new_courses[students->num_courses] = courses;
-      delete[] students->courses;
-      students->courses = new_courses;
-      students->num_courses++;
-      num_courses++;
-      
-      cout << "Success: added student " << bNumber << " into course " << crn << endl;
-  
+  newCourses[students[studentIndex].num_courses] = newCourse;
+  students[studentIndex].num_courses++;
+  delete[] students[studentIndex].courses;
+  students[studentIndex].courses = newCourses;
+
+  cout << "Success: added course " << crn << " to " << bNumber << endl;
       }
   
       else if (command == "drop") {
