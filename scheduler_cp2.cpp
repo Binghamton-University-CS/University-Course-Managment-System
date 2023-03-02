@@ -51,7 +51,7 @@
   
   bool isValidCRN(int crn) { return (crn >= 100000 && crn <= 999999); }
   
-  int findStudentIndex(Student *students, int numStudents, string bNumber) {
+  int findStudent(Student *students, int numStudents, string bNumber) {
     for (int i = 0; i < numStudents; i++) {
       if (students[i].bNumber == bNumber) {
         return i;
@@ -60,7 +60,7 @@
     return -1;
   }
   
-  int findCourseIndex(Course *courses, int num_courses, int crn) {
+  int findCourse(Course *courses, int num_courses, int crn) {
     for (int i = 0; i < num_courses; i++) {
       if (courses[i].crn == crn) {
         return i;
@@ -100,80 +100,46 @@
       cin >> command;
   
       if (command == "build") {
-        int crn;
-        string department;
-        int number;
-        string name;
-        
-  
-        cin >> crn >> department >> number;
-        getline(cin, name);
-  
-      string crn_string;
-      string number_string;
-      stringstream ss1;
-      stringstream ss2;
-      ss1<<crn;
-      ss1>>crn_string;
-      ss2<<number;
-      ss2>>number_string;
+      int crn;
+    string department;
+    int number;
+    string name;
 
-        for(int i=0;i<department.size();i++){
-          if (department[i]== tolower(department[i])){
+    cin >> crn >> department >> number;
+    getline(cin, name);
 
-            cout<<"Input Error: illegal department"<<endl;
-            break;
-          }
-          continue;
-        }
-  
-  
-        if (crn_string.empty() || department.empty() || number_string.empty() ||
-        name.empty()) {
-      cout << "Input Error: too few arguments" << endl;
-      continue;
+    // Check for input errors
+    if (!isValidCRN(crn)) {
+        cout << "Input Error: illegal CRN" << endl;
+        continue;
     }
-    
-  bool crn_exists = false;
-  for (int i = 0; i < num_courses; i++) {
-    if (courses[i].crn == crn) {
-      crn_exists = true;
-      cout << "Fail: cannot build course " << name << " (CRN:" << crn
-           << "): CRN exists" << endl;
-      break;
+    if (department.length() < 2 || department.length() > 4 || !isalpha(department[0])) {
+        cout << "Input Error: illegal department" << endl;
+        continue;
     }
-  }
-  if (crn_exists) {
-    continue;
-  }
-        // Make sure CRN is 6 digits
-        if (crn < 100000 || crn > 999999) {
-          cout << "Input Error: illegal CRN" << endl;
-          continue;
-        }
-  
-        if (department.length() < 2 || department.length() > 4) {
-          cout << "Input Error: illegal department" << endl;
-          continue;
-        }
-  
-        if (number < 100 || number > 700) {
-          cout << "Input Error: illegal course number" << endl;
-          continue;
-        }
-  
-        // Add course to array
-    Course newCourse = {crn,department,number,name};
-    Course *newCourses = new Course[num_courses + 1];
-    for (int i = 0; i < num_courses; i++) {
+    if (number < 100 || number > 700) {
+        cout << "Input Error: illegal course number" << endl;
+        continue;
+    }
+
+    // Check if CRN already exists
+    if (findCourse(courses, num_courses, crn) != -1) {
+        cout << "Fail: cannot build course " << name << " (CRN:" << crn << "): CRN exists" << endl;
+        continue;
+    }
+    //add course to array
+    Course newCourse = { crn, department, number, name };
+    Course* newCourses = new Course[num_courses + 1];
+    for(int i =0;i<num_courses;i++){
       newCourses[i] = courses[i];
     }
     newCourses[num_courses] = newCourse;
     num_courses++;
+
     delete[] courses;
     courses = newCourses;
-        cout << "Success: built course " << department << number
-             << " (CRN: " << crn << ")" << endl;
+
+    cout << "Success: built course " << department <<" " <<number << " (CRN: " << crn << ")" << endl;
         }
   
       else if (command == "cancel") {
@@ -270,13 +236,7 @@
       
       
       //Course* course = nullptr;
-      for (int i = 0; i < num_courses; i++) {
-          if (courses[i].crn == crn) {
-              courses = &courses[i];
-              
-          }
-      }
-  bool crn_exists = false;
+      /*bool crn_exists = false;
   for (int i = 0; i < num_courses; i++) {
     if (courses[i].crn != crn) {
       crn_exists = true;
@@ -286,8 +246,20 @@
   }
   if (crn_exists) {
     continue;
+    }*/
+    int studentIndex = findStudent(students, numStudents, bNumber);
+  if (studentIndex == -1) {
+    cout << "Fail: cannot add, student " << bNumber << " not found" << endl;
+    continue;
   }
 
+  // Search for course by crn
+  int courseIndex = findCourse(courses, num_courses, crn);
+  if (courseIndex == -1) {
+    cout << "Fail: cannot add, course " << crn << " not found" << endl;
+    continue;
+  }
+      
       
       // Add the course to the student's course list
       Course** new_courses = new Course*[students->num_courses + 1];
@@ -298,6 +270,7 @@
       delete[] students->courses;
       students->courses = new_courses;
       students->num_courses++;
+      num_courses++;
       
       cout << "Success: added student " << bNumber << " into course " << crn << endl;
   
@@ -308,12 +281,12 @@
         int crn;
         cin>>bNumber>>crn;
         
-         int studentIndex = findStudentIndex(students, numStudents, bNumber);
+         int studentIndex = findStudent(students, numStudents, bNumber);
     if (studentIndex == -1) {
         cout << "Fail: student " << bNumber << " not found" << endl;
         continue;;
     }
-    int courseIndex = findCourseIndex(courses,num_courses, crn);
+    int courseIndex = findCourse(courses,num_courses, crn);
     if (courseIndex == -1) {
         cout << "Fail: course " << crn << " not found for student " << bNumber << endl;
         continue;
@@ -340,7 +313,7 @@
         continue;
     }
 
-    int courseIndex = findCourseIndex(courses, num_courses, crn);
+    int courseIndex = findCourse(courses, num_courses, crn);
     if (courseIndex == -1) {
         cout << "Error: CRN not found" << endl;
         continue;
@@ -373,7 +346,7 @@
   }
   
   // Find the index of the student with the given B Number
-  int studentIndex = findStudentIndex(students, numStudents, bNumber);
+  int studentIndex = findStudent(students, numStudents, bNumber);
   if (studentIndex == -1) {
     cout << "Fail: could not find student with B Number " << bNumber << endl;
     continue;
